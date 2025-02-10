@@ -1,0 +1,4 @@
+/*
+	A Thing just represents any object in the game.
+	Badguys and the Player are simply just very fancy things.
+*/
