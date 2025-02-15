@@ -4,7 +4,9 @@
   "eventList":[],
   "managed":true,
   "name":"oBadGuy",
-  "overriddenProperties":[],
+  "overriddenProperties":[
+    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oThing","path":"objects/oThing/oThing.yy",},"propertyId":{"name":"editorShouldSave","path":"objects/oThing/oThing.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"True",},
+  ],
   "parent":{
     "name":"Enemy",
     "path":"folders/Objects/Enemy.yy",

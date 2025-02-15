@@ -29,6 +29,8 @@ function editor_create_new_editor(newEditor) {
  */
 function editor_save_level() {
 	
+	show_debug_message("[SOUP] Starting mission save");
+	
 	// Begin ego timer
 	var startTime = get_timer();
 	
@@ -54,32 +56,36 @@ function editor_save_level() {
 	var elapsedTime = get_timer() - startTime;
 	elapsedTime /= 1000;
 	
-	show_debug_message("Level save took " + string(elapsedTime) + " ms");
+	show_debug_message("[SOUP] mission save took " + string(elapsedTime) + " ms");
 	
 	
 }
 
 /**
- * Loops through all of the Things in a given mission and saves them to a file.
+ * Loops through all of the Things in a given mission and saves them to a file in JSON format
  * @param {Id.TextFile} 
  */
 function editor_archive_things(file) {
-	file_text_write_string(file, "THINGS");
-	file_text_writeln(file);
+	var thingsArray = ds_map_create();
 	
 	with (all) {
 		
 		// If this Thing is flagged as needing to be saved, save it to the file
 		if (variable_instance_exists(self, "editorShouldSave")) {
 			if (editorShouldSave) {
-				var thingString = "THING" + "," + string(self.x) + "," + string(self.y) + "," + string(object_get_name(object_index));
-				file_text_write_string(file, thingString);	
-				file_text_writeln(file);
+				var thingData = {
+					object : object_get_name(object_index),
+					x : self.x,
+					y : self.y
+				}
+				
+				ds_map_add(thingsArray, string(object_get_name(object_index)), thingData);
 			}
-		};
+		}
 	}
-	file_text_write_string(file, "END THINGS");
-	file_text_writeln(file);
+	var json = json_encode(thingsArray, true);
+	file_text_write_string(file, json);
+	
 }
 
 /**
@@ -87,9 +93,10 @@ function editor_archive_things(file) {
  * @param {Id.TextFile} 
  */
 function editor_archive_tiles(file) {
+	
+	var tilesArray = ds_map_create();
+	
 	// Tiles
-	file_text_write_string(file, "TILES");
-	file_text_writeln(file);
 	
 	// Get some info that we need to reference the tileset
 	var layID = layer_get_id("Tiles");
@@ -101,22 +108,34 @@ function editor_archive_tiles(file) {
 	for (var i = 0; i < levelWidth; i++) {
 		for (var j = 0; j < levelHeight; j++) {
 			
+			// Get each tile and its metadata and store it in the tileset
 			var tile = tilemap_get(tileID, i, j);
+			
+			var tileIsRotated = tile_get_rotate(tile);
+			var tileIsFlipped = tile_get_flip(tile);
+			var tileIsMirrored = tile_get_mirror(tile);
 			
 			// Skip empty tiles
 			if (tile == 0) {
 				continue;
 			}
 			
-			// Write the tile's info to the given file
-			var tileString = "TILE" + "," + string(i) + "," + string(j) + "," + string(tile);
-			file_text_write_string(file, tileString);
-			file_text_writeln(file);
+			var tileData = {
+					xpos : i,
+					ypos : j,
+					tileType : tile,
+					rotated : tileIsRotated,
+					flipped : tileIsFlipped,
+					mirrored : tileIsMirrored
+					
+				}
 			
-		
+			ds_map_add(tilesArray, "TILE" + string(i) + string(j), tileData);
 		}
 	}
-	file_text_write_string(file, "END TILES");
-	file_text_writeln(file);
+	
+	var json = json_encode(tilesArray, true);
+	file_text_write_string(file, json);
+	
 }
 	
